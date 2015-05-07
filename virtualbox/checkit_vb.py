@@ -38,28 +38,26 @@ def validate_arguments(p_args):
 
 # ----------------------------------------------------------------
 #
-#                 Init Program - Global stuff
+#                 M A I N
 #
 # ----------------------------------------------------------------
 
-# ----------------------------------------------------------------
+def main():
 
-program_name             = os.path.splitext(os.path.basename(__file__))[0] # remove path, then remove extension.
-local_home               = os.environ['HOME']                              # Get home directory
-start_datetime           = time.strftime("%Y%m%d_%H%M%S")                  # Startup time 
-start_datetime_display   = time.strftime("%H:%M:%S %d-%b-%Y")              # Startup time for Display
+    program_name             = os.path.splitext(os.path.basename(__file__))[0] # remove path, then remove extension.
+    local_home               = os.environ['HOME']                              # Get home directory
+    start_datetime           = time.strftime("%Y%m%d_%H%M%S")                  # Startup time 
+    start_datetime_display   = time.strftime("%H:%M:%S %d-%b-%Y")              # Startup time for Display
 
-# ----------------------------------------------------------------
+    # ----------------------------------------------------------------
 
-parser  = argparse.ArgumentParser('Run checkit virtual box')
+    parser  = argparse.ArgumentParser('Run checkit virtual box')
 
-parser.add_argument('-n','--name', help='Enter the name of the Virtual Box to check.', required=True)
+    parser.add_argument('-n','--name',    help='Enter the name of the Virtual Box to check.',     required=True)
+    parser.add_argument('-l','--logdir',  help='Enter the directory to write logs to.',           required=False)
+    parser.add_argument('-c','--confdir', help='Enter the directory where the config files are.', required=False)
 
-parser.add_argument('-l','--logdir', help='Enter the directory to write logs to.', required=False)
-
-parser.add_argument('-c','--confdir', help='Enter the directory where the config files are.', required=False)
-
-initialize_arguments(parser, program_name, start_datetime)
+    initialize_arguments(parser, program_name, start_datetime)
 
 #validate_standard_arguments(args)
 
@@ -81,7 +79,9 @@ initialize_arguments(parser, program_name, start_datetime)
 
 # disconnect_db(db_conn)
 
- 
+# ----------------------------------------------------------------
 
+if __name__ == '__main__':
+    main()
 
-
+# --- eof ---

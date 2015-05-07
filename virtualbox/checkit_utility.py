@@ -17,10 +17,9 @@ import argparse
 # Setup a log file name
 # Remove all spaces from file name
 
-def init_log_filename(p_program, p_name, p_datetime):
+def init_log_filename(p_program, p_target_name, p_datetime):
 
-    l_filename = p_program + '_' + p_name + '_' + p_datetime + '.log'
-    # l_filename = 'x' + '_' + p_name + '_' + p_datetime + '.log'
+    l_filename = p_program + '_' + p_target_name + '_' + p_datetime + '.log'
     l_filename = l_filename.replace(' ','')                       
     return(l_filename)
     
