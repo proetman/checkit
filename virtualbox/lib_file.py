@@ -17,6 +17,7 @@ import lib_proj as lp
 #
 # ----------------------------------------------------------------------------------------------------
 
+
 # ----------------------------------------------------------------------------------------------------
 #
 #                                           Rename File
@@ -178,7 +179,7 @@ def dir_fetch_workdir():
     Fetch the current working directory
     """
     lp.log_debug('start fetchwork_dir')
-    if lp.is_windows():
+    if lp.IS_WINDOWS:
         work_dir = os.environ['USERPROFILE'] + '/log'
         work_dir = work_dir.replace('\\', '/')
     else:

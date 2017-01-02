@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import datetime
 import logging
+import os
 import platform
 import re
 
@@ -19,6 +20,35 @@ import re
 
 SUCCESS=0
 FAIL=1
+IS_WINDOWS =  platform.system() == 'Windows'
+
+
+# ----------------------------------------------------------------------------------------------------
+#
+#                                           read config
+#
+# ----------------------------------------------------------------------------------------------------
+
+
+def config_read():
+    """
+    Read the config file for checkit programs. It contains
+        log directory
+        config directory
+        etc.
+    If this is not found, the program will abort with a fail exit code, and a message.
+    """
+
+    try:
+        config_dir = os.environ['CHECKIT_CONFIG_DIR']
+    except KeyError as err:
+        # Note: Logging not yet enabled, so print error and exit.
+        print('\nERROR: Unable read environment variable CHECKIT_CONFIG_DIR')
+        print('       Please create variable and set the value to the directory where the file')
+        print('       config.txt can be found\n')
+        exit(1)
+
+
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -92,22 +122,6 @@ def file_tail(file_name):
 
 # ----------------------------------------------------------------------------------------------------
 #
-#                                               is Windoze
-#
-# ----------------------------------------------------------------------------------------------------
-
-
-def is_windows():
-    """
-    Determine if running on windows box
-    """
-    log_debug('start isWindows')
-
-    return platform.system() == 'Windows'
-
-
-# ----------------------------------------------------------------------------------------------------
-#
 #                                             validate args
 #
 # ----------------------------------------------------------------------------------------------------
@@ -141,7 +155,10 @@ def args_validate(p_parser, p_log_file):
         log_info('\n')
         log_info('rs_lib.validate_args: Logging level: [{}]'.format(logging_level))
 
-        print("\nprogram log_file: " + p_log_file.replace('/', '\\') + "\n")
+        if IS_WINDOWS:
+            print("\nprogram log file: " + p_log_file.replace('/', '\\') + "\n")
+        else:
+            print("\nprogram log file: " + p_log_file + "\n")
 
     # print the arguments to log file at level INFO
     log_args(args)
@@ -250,10 +267,11 @@ def log_args(p_args):
     if len(p_args) > 0:
 
         # Display heading
-        log_info("\n")
-        log_info("Program arguments")
-        log_info("-----------------")
+        log_info('')
+        log_info('Program arguments:')
+        log_info('')
         log_info(log_template.format('Arg', 'Value'))
+        log_info(log_template.format('-'*20, '-'*50))
 
         # Display Arguments
         for arg in p_args:
@@ -263,7 +281,6 @@ def log_args(p_args):
                 else:
                     log_info(log_template.format(arg, 'False'))
             else:
-                log_info(log_template.format(arg, ''))
                 log_info(log_template.format(arg, p_args[arg]))
 
         log_info("\n")

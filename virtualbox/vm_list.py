@@ -1,5 +1,5 @@
 """
-This is a template for all new programs
+List all VM, including extra info, not sure what yet!
 """
 
 from __future__ import division
@@ -50,8 +50,8 @@ def initialise():
         -d DEBUG -t my_table_name
           """, formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('-t', '--table',
-                        help='Enter table name',
+    parser.add_argument('--host',
+                        help='Enter the host (where the VM servers live).',
                         required=True)
 
     # Add arguments
@@ -83,10 +83,12 @@ def main():
 
     args = initialise()
 
-    p_table = args['table']
-    print("My table name is '{}'.".format(p_table))
+    config = lp.config_read()
 
-    if p_table is None:
+    p_host = args['host']
+    print("The host is '{}'.".format(p_host))
+
+    if p_host is None:
         return lp.FAIL
     else:
         return lp.SUCCESS
