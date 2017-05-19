@@ -14,8 +14,11 @@ import argparse
 # import pandas as pd
 
 # import webbrowser
-import bs4
-import requests
+#import bs4
+#import requests
+import smtplib
+from email.mime.text import MIMEText
+import time
 from selenium import webdriver
 
 import home_lib as hlib
@@ -41,14 +44,52 @@ def process():
     run a process
     """
     print('Start process')
+    textfile = 'c:/temp/hosts.txt'
+    with open(textfile) as fp:
+    # Create a text/plain message
+        msg = MIMEText(fp.read())
+
+    me = 'paul.roetman@gmail.com'
+    you = 'paul.roetman@gmail.com'
+
+    msg['Subject'] = 'The contents of %s' % textfile
+    msg['From'] = me
+    msg['To'] = you
+
+    # Send the message via our own SMTP server.
+    s = smtplib.SMTP('localhost')
+    s.send_message(msg)
+    s.quit()
+
 
     browser = webdriver.Firefox()
+    browser.get('https://www.service.transport.qld.gov.au/checkrego/application/TermAndConditions.xhtml?windowId=3ab')
+    conf_button = browser.find_element_by_name('tAndCForm:confirmButton')
+    conf_button.click()
+    time.sleep(1)
+    reg_field = browser.find_element_by_id('vehicleSearchForm:plateNumber')
+    reg_field.send_keys('499vqo')
 
+    time.sleep(0.5)
+    conf_button = browser.find_element_by_name('vehicleSearchForm:confirmButton')
+    conf_button.click()
+
+    time.sleep(1)
+
+    for row in browser.find_elements_by_css_selector("dl.data"):
+        cell_names = row.find_elements_by_tag_name('dt')
+        cell_data = row.find_elements_by_tag_name('dd')
+        cell_counter = 0
+        for c in cell_names:
+            print('{} is {}'.format(c.text, cell_data[cell_counter].text))
+            cell_counter += 1
+
+    browser.quit()
     # res = requests.get('https://www.service.transport.qld.gov.au/checkrego/application/VehicleSearch.xhtml?windowId=e85')
-    res = requests.get('https://www.service.transport.qld.gov.au/checkrego/application/TermAndConditions.xhtml?windowId=3ab')
-    res.raise_for_status()
-    noStarchSoup = bs4.BeautifulSoup(res.text, "lxml")
-    type(noStarchSoup)
+#    res = requests.get('https://www.service.transport.qld.gov.au/checkrego/application/TermAndConditions.xhtml?windowId=3ab')
+#    res.raise_for_status()
+#    noStarchSoup = bs4.BeautifulSoup(res.text, "lxml")
+#    type(noStarchSoup)
     return
 
 
