@@ -5,7 +5,7 @@ Generic Library
 import logging
 
 import collections
-
+import csv
 import mmap
 import os
 import socket
@@ -40,6 +40,10 @@ FAIL_GENERIC = -1
 FAIL_NO_DB_CONNECT = -2
 DAYS_FOR_DEEP_ANALYSE = 5
 
+CONFIG_DIR = 'C:/Users/paul/Dropbox/config'
+SAVE_DIR = '{}/{}'.format(CONFIG_DIR, 'saved_info')
+SAVE_REP = '{}/{}'.format(CONFIG_DIR, 'reports')
+
 EMAIL_DEFAULT = 'proetman@gmail.com.au'
 
 
@@ -71,10 +75,33 @@ MAIL_FOOTER = """\
 """
 
 MAIL_FROM_USER = 'noreply@gmail.com'
-# --- load details
+# --- fetch config files
+# --------------------------------------------------------------------
+#
+#                          Fetch Rego Plats
+#
+# --------------------------------------------------------------------
 
 
+def fetch_rego_plates():
+    """
+    fetch all number plates from the rego.csv file
+    """
+    csv_file = '{}/{}'.format(CONFIG_DIR, 'rego.csv')
+    csv_data = []
 
+    header = True
+    with open(csv_file) as csvfile:
+        f = csv.reader(csvfile, delimiter=',')
+
+        for row in f:
+            if header:
+                header = False
+                continue
+            csv_data.append(row)
+            # print(row)
+
+    return csv_data
 
 
 
@@ -137,6 +164,33 @@ def init_app(p_args, p_print_date=True):
         p_i('Run Date: {}'.format(run_datetime))
 
     return True
+
+# --------------------------------------------------------------------
+#
+#                          init email
+#
+# --------------------------------------------------------------------
+
+def init_email():
+    """ Initialize the email config """
+
+    email_config_file = '{}/{}'.format(CONFIG_DIR, 'email.txt')
+    with open(email_config_file) as email_file:
+        content = email_file.readlines()
+
+    content = [x.strip() for x in content]
+
+    if len(content[1]) == 0:
+        return None
+
+    email_config = {}
+    email_config['from'] = content[0]
+    email_config['pass'] = content[1]
+    email_config['to'] = content[2]
+
+    return email_config
+
+
 
 # --------------------------------------------------------------------
 #

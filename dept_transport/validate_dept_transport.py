@@ -5,7 +5,6 @@ Validate spreadsheet data is same as db data
 from __future__ import division
 from __future__ import print_function
 
-import argparse
 # import datetime
 # import re
 # import textwrap
@@ -14,14 +13,22 @@ import argparse
 # import pandas as pd
 
 # import webbrowser
-#import bs4
-#import requests
-import smtplib
-from email.mime.text import MIMEText
+# import bs4
+# import requests
+# import email
+# import smtplib
+
+# from email.mime.text import MIMEText
+import argparse
+import pickle
 import time
 from selenium import webdriver
 
+# from PollyReports import *
+# from reportlab.pdfgen.canvas import Canvas
+
 import home_lib as hlib
+import home_sendmail as hmail
 
 
 # --------------------------------------------------------------------
@@ -37,30 +44,74 @@ import home_lib as hlib
 #                          setup load details
 #
 # --------------------------------------------------------------------
+def generate_report(p_all_info):
+    """ Generate html report """
+    """ hmmmm, will do the html stuff later. Bigger fish to fry now!"""
+
+    rep_format = "{:15s} {:15s} {:45s}\r\n"
+
+    output_data = rep_format.format('Rego', 'Date', 'Descripion')
+    output_data += rep_format.format('-'*15, '-'*15, '-'*45)
+
+    for row in p_all_info:
+        curr_rego = ''
+        curr_date = ''
+        curr_desc = ''
+
+        for key, val in row.items():
+            print('key = {}, val ={}'.format(key, val))
+            if key == 'Description':
+                curr_desc = val
+            if key == 'Registration number':
+                curr_rego = val
+            if key == 'Expiry':
+                curr_date = val
+
+        output_data += rep_format.format(curr_rego, curr_date, curr_desc)
+
+    return output_data
+    # rpt = Report
+# --------------------------------------------------------------------
+#
+#                          process
+#
+# --------------------------------------------------------------------
 
 
-def process():
+def process(p_rego_plates):
     """
     run a process
     """
     print('Start process')
-    textfile = 'c:/temp/hosts.txt'
-    with open(textfile) as fp:
-    # Create a text/plain message
-        msg = MIMEText(fp.read())
 
-    me = 'paul.roetman@gmail.com'
-    you = 'paul.roetman@gmail.com'
+    all_vehicles = []
 
-    msg['Subject'] = 'The contents of %s' % textfile
-    msg['From'] = me
-    msg['To'] = you
+    for vehicle in p_rego_plates:
 
+        dot_info = fetch_plate_info(vehicle)
+        all_vehicles.append(dot_info)
+
+    return all_vehicles
     # Send the message via our own SMTP server.
-    s = smtplib.SMTP('localhost')
-    s.send_message(msg)
-    s.quit()
+#    s = smtplib.SMTP('smtp.gmail.com')
+#    s.send_message(msg)
+#    s.quit()
 
+# --------------------------------------------------------------------
+#
+#                          Fetch plate info
+#
+# --------------------------------------------------------------------
+
+
+def fetch_plate_info(p_vehicle):
+    """
+    run a process
+    """
+
+    veh_plate = p_vehicle[0]
+    veh_email = p_vehicle[1]
+    veh_desc = p_vehicle[2]
 
     browser = webdriver.Firefox()
     browser.get('https://www.service.transport.qld.gov.au/checkrego/application/TermAndConditions.xhtml?windowId=3ab')
@@ -68,7 +119,7 @@ def process():
     conf_button.click()
     time.sleep(1)
     reg_field = browser.find_element_by_id('vehicleSearchForm:plateNumber')
-    reg_field.send_keys('499vqo')
+    reg_field.send_keys(veh_plate)
 
     time.sleep(0.5)
     conf_button = browser.find_element_by_name('vehicleSearchForm:confirmButton')
@@ -76,22 +127,39 @@ def process():
 
     time.sleep(1)
 
+    dot_info = {}
+
+    dot_info['orig_rego'] = veh_plate
+    dot_info['email'] = veh_email
+    dot_info['veh_desc'] = veh_desc
+
     for row in browser.find_elements_by_css_selector("dl.data"):
         cell_names = row.find_elements_by_tag_name('dt')
         cell_data = row.find_elements_by_tag_name('dd')
         cell_counter = 0
         for c in cell_names:
-            print('{} is {}'.format(c.text, cell_data[cell_counter].text))
+            dot_info[c.text] = cell_data[cell_counter].text
             cell_counter += 1
 
     browser.quit()
-    # res = requests.get('https://www.service.transport.qld.gov.au/checkrego/application/VehicleSearch.xhtml?windowId=e85')
-#    res = requests.get('https://www.service.transport.qld.gov.au/checkrego/application/TermAndConditions.xhtml?windowId=3ab')
-#    res.raise_for_status()
-#    noStarchSoup = bs4.BeautifulSoup(res.text, "lxml")
-#    type(noStarchSoup)
-    return
 
+    return dot_info
+# --- save data
+# --------------------------------------------------------------------
+#
+#                          save data
+#
+# --------------------------------------------------------------------
+
+
+def save_data(p_all_info):
+    """
+    save all data to a csv file, and pickle file
+    """
+    pickle_file = '{}/{}'.format(hlib.SAVE_DIR, 'dept_of_transport.pickle')
+
+    with open(pickle_file, 'w') as pfile:
+        pickle.dump(p_all_info, pfile)
 
 # --- Program Init
 # --------------------------------------------------------------------
@@ -156,13 +224,39 @@ def main():
 
     # -- Initialise
     if not hlib.init_app(args):
+        print('Failed to init app, aborting')
         return hlib.FAIL_GENERIC
+
+    # send_email(email_config)
 
     # -------------------------------------
     # Fetch program arguments
 
+    # -------------------------------------
+    # Fetch config
+
+    rego_plates = hlib.fetch_rego_plates()
+
     # p_debug_type = args['debug_type']
-    process()
+    all_info = process(rego_plates)
+
+#    if not save_data(all_info):
+#        return(hlib.FAIL_GENERIC)
+
+    text_report = generate_report(all_info)
+
+    rep_file = '{}/{}'.format(hlib.SAVE_DIR, 'dept_of_transport_report.txt')
+    file = open(rep_file, 'w')
+    file.write(text_report)
+    file.close()
+
+#    if not save_report(all_info):
+#        return(hlib.FAIL_GENERIC)
+
+    hmail.send_email('proetman@gmail.com',
+                     p_subject='Hi, this is a test',
+                     p_inline=rep_file)
+
     retval = hlib.SUCCESS
 
     print('Done...')
