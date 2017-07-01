@@ -23,6 +23,7 @@ import argparse
 import pickle
 import time
 from selenium import webdriver
+from datetime import datetime
 
 # from PollyReports import *
 # from reportlab.pdfgen.canvas import Canvas
@@ -48,10 +49,10 @@ def generate_report(p_all_info):
     """ Generate html report """
     """ hmmmm, will do the html stuff later. Bigger fish to fry now!"""
 
-    rep_format = "{:15s} {:15s} {:45s}\r\n"
+    rep_format = "{:15s} {:15s} {:45s} {}\r\n"
 
-    output_data = rep_format.format('Rego', 'Date', 'Descripion')
-    output_data += rep_format.format('-'*15, '-'*15, '-'*45)
+    output_data = rep_format.format('Rego', 'Date', 'Descripion', 'Days to go')
+    output_data += rep_format.format('-'*15, '-'*15, '-'*45, '-'*45)
 
     for row in p_all_info:
         curr_rego = ''
@@ -67,7 +68,11 @@ def generate_report(p_all_info):
             if key == 'Expiry':
                 curr_date = val
 
-        output_data += rep_format.format(curr_rego, curr_date, curr_desc)
+        actual_date = datetime.strptime(curr_date,'%d/%m/%Y')
+        today = datetime.now()
+        date_diff = actual_date - today
+
+        output_data += rep_format.format(curr_rego, curr_date, curr_desc, date_diff)
 
     return output_data
     # rpt = Report
@@ -254,7 +259,11 @@ def main():
 #        return(hlib.FAIL_GENERIC)
 
     hmail.send_email('proetman@gmail.com',
-                     p_subject='Hi, this is a test',
+                     p_subject='Weekly Rego Report',
+                     p_inline=rep_file)
+
+    hmail.send_email('annieroetman@gmail.com',
+                     p_subject='Weekly Rego Report',
                      p_inline=rep_file)
 
     retval = hlib.SUCCESS
