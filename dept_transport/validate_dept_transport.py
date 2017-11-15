@@ -262,9 +262,9 @@ def main():
                      p_subject='Weekly Rego Report',
                      p_inline=rep_file)
 
-    hmail.send_email('annieroetman@gmail.com',
-                     p_subject='Weekly Rego Report',
-                     p_inline=rep_file)
+    # hmail.send_email('annieroetman@gmail.com',
+    #                  p_subject='Weekly Rego Report',
+    #                  p_inline=rep_file)
 
     retval = hlib.SUCCESS
 

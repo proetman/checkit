@@ -40,7 +40,7 @@ FAIL_GENERIC = -1
 FAIL_NO_DB_CONNECT = -2
 DAYS_FOR_DEEP_ANALYSE = 5
 
-CONFIG_DIR = 'C:/Users/paul/Dropbox/config'
+CONFIG_DIR = '/home/user/Dropbox/config'
 SAVE_DIR = '{}/{}'.format(CONFIG_DIR, 'saved_info')
 SAVE_REP = '{}/{}'.format(CONFIG_DIR, 'reports')
 
@@ -155,7 +155,7 @@ def init_app(p_args, p_print_date=True):
 
     g_params['run_date_str'] = time.strftime("%d/%m/%Y")
     g_params['run_time_str'] = time.strftime("%H:%M:%S")
-    g_params['osuser'] = os.getlogin()
+    # g_params['osuser'] = os.getlogin()
     g_params['local_host'] = socket.gethostname()
 
     if p_print_date:
@@ -366,7 +366,7 @@ def fetch_log_dirs():
 
     # log_debug('Start log fetch_dirs')
 
-    l_root = os.environ['SystemDrive'] + '/test_results/'
+    l_root =  '~/test_results/'
 
     global TEST_RESULT_DIRS
     TEST_RESULT_DIRS = {}
