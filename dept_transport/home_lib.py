@@ -12,6 +12,7 @@ import socket
 import platform
 import tabulate
 import difflib
+from pathlib import Path
 
 import re
 import sys
@@ -366,7 +367,9 @@ def fetch_log_dirs():
 
     # log_debug('Start log fetch_dirs')
 
-    l_root =  '~/test_results/'
+    home_dir = str(Path.home())
+
+    l_root =  f"{home_dir}/test_results/"
 
     global TEST_RESULT_DIRS
     TEST_RESULT_DIRS = {}

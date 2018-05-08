@@ -73,6 +73,7 @@ def generate_report(p_all_info):
         date_diff = actual_date - today
 
         output_data += rep_format.format(curr_rego, curr_date, curr_desc, date_diff)
+        hlib.p_i(output_data)
 
     return output_data
     # rpt = Report
